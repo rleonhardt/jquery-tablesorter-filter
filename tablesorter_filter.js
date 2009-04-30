@@ -16,17 +16,25 @@
   $.extend({
     tablesorterFilter: new function() {
 
-      // Default filterFunction implementation (element text, search words, case-sensitive flag)
-      function has_words(str, words, caseSensitive) {
+      // Default filterFunction implementation (element text, search words, case-sensitive flag, OR mode instead of AND)
+      function has_words(str, words, caseSensitive, orMode) {
         var text = caseSensitive ? str : str.toLowerCase();
 
-        for (var i=0; i < words.length; i++) {
-          if (words[i].charAt(0) == '-') {
-            if (text.indexOf(words[i].substr(1)) != -1) return false; // Negated word must not be in text
-          } else if (text.indexOf(words[i]) == -1) return false; // Normal word must be in text
+        if(orMode) {
+          for (var i=0; i < words.length; i++) {
+            if (words[i].charAt(0) == '-') {
+              if (text.indexOf(words[i].substr(1)) != -1) return false; // Negated word must not be in text
+            } else if (text.indexOf(words[i]) != -1) return true; // Normal word may be in text
+          }
+          return false;
+        } else {
+          for (var i=0; i < words.length; i++) {
+            if (words[i].charAt(0) == '-') {
+              if (text.indexOf(words[i].substr(1)) != -1) return false; // Negated word must not be in text
+            } else if (text.indexOf(words[i]) == -1) return false; // Normal word must be in text
+          }
+          return true;
         }
-
-        return true;
       }
 
 
@@ -46,7 +54,8 @@
               caseSensitive: caseSensitive,
               words: caseSensitive ? phrase.split(" ") : phrase.toLowerCase().split(" "),
               findStr: table.config.filter[i].filterColumns ? "td:eq(" + table.config.filter[i].filterColumns.join("),td:eq(") + ")" : "",
-              filterFunction: table.config.filter[i].filterFunction
+              filterFunction: table.config.filter[i].filterFunction,
+              orMode: table.config.filter[i].filterOrMode
             });
           }
         }
@@ -62,7 +71,7 @@
           var search_text = function() {
             var elem = jQuery(this);
             for(var i=0; i < filterCount; i++) {
-              if(! filters[i].filterFunction( (filters[i].findStr ? elem.find(filters[i].findStr) : elem).text(), filters[i].words, filters[i].caseSensitive)) {
+              if(! filters[i].filterFunction( (filters[i].findStr ? elem.find(filters[i].findStr) : elem).text(), filters[i].words, filters[i].caseSensitive, filters[i].orMode)) {
                 return true; // Skip elem and continue to next element
               }
             }
@@ -139,7 +148,8 @@
         filterColumns: null,
         filterCaseSensitive: false,
         filterWaitTime: 500,
-        filterFunction: has_words
+        filterFunction: has_words,
+        filterOrMode: false
       };
 
 

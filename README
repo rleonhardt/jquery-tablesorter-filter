@@ -43,14 +43,15 @@ Search: <input name="filter" id="filter-box" value="" maxlength="30" size="30" t
 
 CONFIGURATION
 
-tablesorterFilter takes up to six parameters:
+tablesorterFilter takes up to seven optional parameters:
 
-    * filterContainer - (optional) The DOM id of the input box where the user will type the search string. The default is "#filter-box".
-    * filterClearContainer - (optional) The DOM id of the button (or image, ...) which will clear the search string and reset the table to it's original, unfiltered state. The default is "#filter-clear-button".
-    * filterColumns - (optional) An array of columns, starting at 0, which will be searched. The default is null so all columns will be searched.
-    * filterCaseSensitive - (optional) Boolean stating whether the search string is case sensitive. The default is false.
-    * filterWaitTime - (optional) Time after last key press to start filtering. The default is 500 (milliseconds).
-    * filterFunction - (optional) Custom function to filter by column text. The default is the plugin function has_words.
+    * filterContainer (string) - The DOM id of the input box where the user will type the search string. The default is "#filter-box".
+    * filterClearContainer (string) - The DOM id of the button (or image, ...) which will clear the search string and reset the table to it's original, unfiltered state. The default is "#filter-clear-button".
+    * filterColumns (array of int) - An array of columns, starting at 0, which will be searched. The default is null so all columns will be searched.
+    * filterCaseSensitive (boolean) - States whether the search string is case sensitive. The default is false.
+    * filterWaitTime (int) - Time after last key press to start filtering. The default is 500 (milliseconds).
+    * filterFunction (function) - Custom function to filter by column text. The default is the plugin function has_words.
+    * filterOrMode (boolean) - Filter by OR mode, any word may occur. The default is false (AND mode, all words must occur).
 
 You may provide multiple filters, i.e.: .tablesorterFilter( { filterColumns: [0, 1] },
                                                             { filterContainer: "#filter-box-date", filterColumns: [2], filterFunction: filterByDate } )
