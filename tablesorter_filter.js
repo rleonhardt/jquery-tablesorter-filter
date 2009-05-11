@@ -156,6 +156,10 @@
       this.construct = function() {
         var settings = arguments; // Allow multiple config objects in constructor call
 
+        // Ensure default filter values if no parameters have been passed
+        if(! settings.length)
+          settings = [{}];
+
         return this.each(function() {
           this.config.filter = new Array(settings.length);
           var config = this.config;
