@@ -43,7 +43,7 @@ Search: <input name="filter" id="filter-box" value="" maxlength="30" size="30" t
 
 CONFIGURATION
 
-tablesorterFilter takes up to seven optional parameters:
+tablesorterFilter takes up to eight optional parameters:
 
     * filterContainer (string) - The DOM id of the input box where the user will type the search string. The default is "#filter-box".
     * filterClearContainer (string) - The DOM id of the button (or image, ...) which will clear the search string and reset the table to it's original, unfiltered state. The default is "#filter-clear-button".
@@ -52,6 +52,7 @@ tablesorterFilter takes up to seven optional parameters:
     * filterWaitTime (int) - Time after last key press to start filtering. The default is 500 (milliseconds).
     * filterFunction (function) - Custom function to filter by column text. The default is the plugin function has_words.
     * filterOrMode (boolean) - Filter by OR mode, any word may occur. The default is false (AND mode, all words must occur).
+    * filterColumn (int) - Filter only single column index, all defined filters with filterColumns not containing this value will be deactivated. The default is null.
 
 You may provide multiple filters, i.e.: .tablesorterFilter( { filterColumns: [0, 1] },
                                                             { filterContainer: "#filter-box-date", filterColumns: [2], filterFunction: filterByDate } )
@@ -61,6 +62,34 @@ Search words are separated by spaces, words with a leading dash will be excluded
 Example: "include -exclude" will filter for all rows which do contain the (partitial) word "include" but at the same time do not contain the word "exclude".
 
 You may filter programmatically: $("#filter-box").trigger("keyup").
+
+If you only want to filter a single column at a time, use .tablesorterFilter( { filterColumn: 2 } ) constructor call
+and $("table").trigger("filterColumn", 3) afterwards to change filtered column index and start filtering again.
+$("table").trigger("filterColumn", null) stops single column filter mode and reactivates filterColumns mode.
+
+
+BOUND EVENTS
+
+// Start filtering
+$("table").trigger("doFilter");
+
+// Clear filter
+$("table").trigger("clearFilter");
+
+// Filter only third column and start filtering
+$("table").trigger("filterColumn", 2);
+
+// Restore filterColumns handling and start filtering
+$("table").trigger("filterColumn", null);
+
+
+TRIGGERED EVENTS
+
+// Filtering finished
+$("table").bind("filterEnd", function (event) { } );
+
+// Filter cleared
+$("table").bind("filterCleared", function (event) { } );
 
 
 REQUIREMENTS

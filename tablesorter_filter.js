@@ -50,10 +50,22 @@
           var phrase = jQuery.trim(container.val()).replace(/\s+/g, ' ');
           if(phrase.length != 0) {
             var caseSensitive = table.config.filter[i].filterCaseSensitive;
+
+            // Should only several columns be filtered?
+            var findStr = '';
+            if(table.config.filterColumn !== null) {
+              // If single column should be filtered, skip all filters without this column
+              if(table.config.filter[i].filterColumns && $.inArray(table.config.filterColumn, table.config.filter[i].filterColumns) == -1)
+                continue;
+              findStr = "td:eq(" + table.config.filterColumn + ")";
+            } else if(table.config.filter[i].filterColumns) {
+              findStr = "td:eq(" + table.config.filter[i].filterColumns.join("),td:eq(") + ")";
+            }
+
             filters.push({
               caseSensitive: caseSensitive,
               words: caseSensitive ? phrase.split(" ") : phrase.toLowerCase().split(" "),
-              findStr: table.config.filter[i].filterColumns ? "td:eq(" + table.config.filter[i].filterColumns.join("),td:eq(") + ")" : "",
+              findStr: findStr,
               filterFunction: table.config.filter[i].filterFunction,
               orMode: table.config.filter[i].filterOrMode
             });
@@ -107,7 +119,7 @@
           $(table).trigger("sorton", [table.config.sortList]);
         }
 
-        if(table.config.debug) { $.tablesorter.benchmark("Apply filter:", cacheTime); }
+        if(table.config.debug) { $.tablesorter.benchmark("Apply filter", cacheTime); }
 
         // Inform subscribers that filtering finished
         $(table).trigger("filterEnd");
@@ -142,6 +154,15 @@
         return table;
       };
 
+      // Set single column index to be filtered (null restores specified filterColumns)
+      // Automatically starts filtering afterwards
+      function setFilterColumn(table, i) {
+        if(i === null || ! isNaN(parseInt(i)) && i >= 0) {
+          table.config.filterColumn = parseInt(i);
+          doFilter(table);
+        }
+      }
+
       this.defaults = {
         filterContainer: '#filter-box',
         filterClearContainer: '#filter-clear-button',
@@ -149,7 +170,8 @@
         filterCaseSensitive: false,
         filterWaitTime: 500,
         filterFunction: has_words,
-        filterOrMode: false
+        filterOrMode: false,
+        filterColumn: null
       };
 
 
@@ -164,9 +186,16 @@
           this.config.filter = new Array(settings.length);
           var config = this.config;
           config.filter = new Array(settings.length);
+          config.filterColumn = null;
 
-          for (var i = 0; i < settings.length; i++)
+          for (var i = 0; i < settings.length; i++) {
             config.filter[i] = $.extend(this.config.filter[i], $.tablesorterFilter.defaults, settings[i]);
+
+            // Allow constructor object to initialize filterColumn
+            if(config.filter[i].filterColumn !== null)
+              config.filterColumn = config.filter[i].filterColumn;
+            delete config.filter[i].filterColumn;
+          }
 
           var table = this;
 
@@ -240,11 +269,17 @@
             }
           }
 
+          // Example: $("table").trigger("doFilter");
           $(table).bind("doFilter",function() {
             doFilter(table);
           });
+          // Example: $("table").trigger("clearFilter");
           $(table).bind("clearFilter",function() {
             clearFilter(table);
+          });
+          // Example: $("table").trigger("filterColumn", 2);
+          $(table).bind("filterColumn",function(event, i) {
+            setFilterColumn(table, i);
           });
         });
       };
